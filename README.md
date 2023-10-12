@@ -13,7 +13,7 @@
 
 - 📫 You can reach me via email at xspy60@gmail.com
 - 🌐 Connect with me on linkedin.com/in/yamin-binyoosuf-598967215
-- 📸 Follow me on at x @yaminbinyoosuf
+- 📸 Follow me on at x.com @yaminbinyoosuf
 
 
 ## Future Plans
