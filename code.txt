@@ -1,0 +1,51 @@
+#include <SoftwareSerial.h>
+
+SoftwareSerial mySerial(9, 10);
+
+const int buttonPin = 2; // Pin where the button is connected
+int buttonState = 0;     // Variable for reading the button state
+
+void setup()
+{
+  mySerial.begin(9600);   // Setting the baud rate of GSM Module
+  Serial.begin(9600);     // Setting the baud rate of Serial Monitor (Arduino)
+  pinMode(buttonPin, INPUT);
+  delay(100);
+}
+
+void loop()
+{
+  buttonState = digitalRead(buttonPin); // Read the button state
+
+  if (buttonState == HIGH) // Check if the button is pressed
+  {
+    sendSMS(); // Call the sendSMS function
+    delay(1000); // Debounce the button
+  }
+
+  if (Serial.available() > 0)
+  {
+    switch (Serial.read())
+    {
+      case 'r':
+        mySerial.println("AT+CNMI=2,2,0,0,0"); // AT Command to receive a live SMS
+        delay(1000);
+        break;
+    }
+  }
+
+  if (mySerial.available() > 0)
+    Serial.write(mySerial.read());
+}
+
+void sendSMS()
+{
+  mySerial.println("AT+CMGF=1");    // Sets the GSM Module in Text Mode
+  delay(1000);
+  mySerial.println("AT+CMGS=\"+91xxxxxxxxxx\"\r"); // Replace with the recipient's mobile number
+  delay(1000);
+  mySerial.println("emergancy alert"); // The SMS text you want to send
+  delay(100);
+  mySerial.println((char)26); // ASCII code of CTRL+Z for indicating the end of SMS to the module
+  delay(1000);
+}
