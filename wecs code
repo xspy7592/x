@@ -1,0 +1,78 @@
+#include <SoftwareSerial.h>
+
+// Create a SoftwareSerial object named mySerial using pins 9 (RX) and 10 (TX)
+SoftwareSerial mySerial(9, 10);
+
+// Define constants and variables for button handling
+const int buttonPin = 2; // Pin where the button is connected
+int buttonState = 0;     // Variable for reading the button state
+
+void setup()
+{
+  // Initialize the SoftwareSerial communication with the GSM module at a baud rate of 9600
+  mySerial.begin(9600);
+  
+  // Initialize the Serial communication with the Arduino Serial Monitor at a baud rate of 9600
+  Serial.begin(9600);
+
+  // Set the button pin as an input
+  pinMode(buttonPin, INPUT);
+
+  // Delay for stability
+  delay(100);
+}
+
+void loop()
+{
+  // Read the state of the button
+  buttonState = digitalRead(buttonPin);
+
+  // Check if the button is pressed
+  if (buttonState == HIGH)
+  {
+    // Call the sendSMS function to send an emergency alert SMS
+    sendSMS();
+    
+    // Debounce the button with a delay of 1000 milliseconds
+    delay(1000);
+  }
+
+  // Check if there is data available on the Serial Monitor
+  if (Serial.available() > 0)
+  {
+    // Read the character from the Serial Monitor
+    switch (Serial.read())
+    {
+      // If 'r' is received, send AT command to configure the GSM module to receive live SMS
+      case 'r':
+        mySerial.println("AT+CNMI=2,2,0,0,0");
+        delay(1000);
+        break;
+    }
+  }
+
+  // Check if there is data available on the GSM module's serial interface
+  if (mySerial.available() > 0)
+    // Read the data from the GSM module and write it to the Serial Monitor
+    Serial.write(mySerial.read());
+}
+
+// Function to send an emergency alert SMS
+void sendSMS()
+{
+  // Set the GSM module in text mode
+  mySerial.println("AT+CMGF=1");
+  delay(1000);
+
+  // Specify the recipient's mobile number (replace with the actual number)
+  mySerial.println("AT+CMGS=\"+91xxxxxxxxxx\"\r");
+  delay(1000);
+
+  // Specify the SMS text to be sent
+  mySerial.println("emergency alert");
+  delay(100);
+
+  // Send the ASCII code of CTRL+Z to indicate the end of the SMS to the module
+  mySerial.println((char)26);
+  delay(1000);
+}
